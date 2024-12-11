@@ -10,13 +10,28 @@ public class ETNgraph {
     }
 
     public void addNode(Node node){
-        // TODO: check if node already exists in graph, if not then add it to the graph
+        for(int i = 0; i< graph.size(); i++){
+            if(graph.get(i).address.equals(node.address)){
+                return;
+            }
+        }
         graph.add(node);
     }
+
     public void addEdge(Node node1, Node node2){
         Edge edge = new Edge(node1, node2);
         node1.edges.add(edge);
     }
 
     //implement a BuildGraph method here later:
+    public void buildGraph(ETNgraph g){
+        // TODO: implement buildGraph method
+    }
+
+    //print method used for testing
+    public void printNumberOfSends(){
+     for(int i = 0; i< graph.size(); i++){
+         System.out.println(graph.get(i).address+" : "+graph.get(i).edges.size());
+     }
+    }
 }
