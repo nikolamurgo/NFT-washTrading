@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ETNgraph {
@@ -11,7 +14,7 @@ public class ETNgraph {
 
     public void addNode(Node node){
         for(int i = 0; i< graph.size(); i++){
-            if(graph.get(i).address.equals(node.address)){
+            if(graph.get(i).getAddress().equals(node.address)){
                 return;
             }
         }
@@ -24,24 +27,27 @@ public class ETNgraph {
     }
 
     //implement a BuildGraph method here later:
-    public void buildGraph(ETNgraph g){
-        // TODO: implement buildGraph method
-    }
+    public void buildGraph() throws IOException {
 
-    //print method used for testing
-    public void printNumberOfSends(){
-     for(int i = 0; i< graph.size(); i++){
-         System.out.println(graph.get(i).address+" : "+graph.get(i).edges.size());
-     }
-    }
+        String line = "";
+        BufferedReader br = new BufferedReader(new FileReader("src/linkabilityNetworksData/prog3ETNsample.csv"));
 
-    public void printGraphEdges(){
-        for(int i = 0; i< graph.size(); i++){
-            System.out.print(graph.get(i).address+" -> ");
-            for(int j=0; j < graph.get(i).edges.size(); j++){
-                System.out.print(graph.get(i).edges.get(j).receiver.address+" , ");
-            }
-            System.out.println();
+        long start = System.currentTimeMillis();
+
+        while (br.readLine() != null) {
+            line = br.readLine();
+            String[] dataOnLine = line.split(",");
+            Node sender = new Node(dataOnLine[5]);
+            Node receiver = new Node(dataOnLine[6]);
+            addNode(sender);
+            addEdge(sender, receiver);
         }
+
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+
+
+        br.close();
     }
+
 }

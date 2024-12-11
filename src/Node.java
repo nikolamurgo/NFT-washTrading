@@ -14,6 +14,4 @@ public class Node {
         return address;
     }
 
-
-
 }
