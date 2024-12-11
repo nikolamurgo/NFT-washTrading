@@ -24,7 +24,10 @@ public class Main {
         etngraph.addEdge(v5,v3);
         etngraph.addEdge(v4,v1);
 
+//        etngraph.printNumberOfSends();
+        etngraph.printGraphEdges();
+
         // ------------------------------------------
-        etngraph.printNumberOfSends();
+
     }
 }

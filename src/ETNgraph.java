@@ -34,4 +34,14 @@ public class ETNgraph {
          System.out.println(graph.get(i).address+" : "+graph.get(i).edges.size());
      }
     }
+
+    public void printGraphEdges(){
+        for(int i = 0; i< graph.size(); i++){
+            System.out.print(graph.get(i).address+" -> ");
+            for(int j=0; j < graph.get(i).edges.size(); j++){
+                System.out.print(graph.get(i).edges.get(j).receiver.address+" , ");
+            }
+            System.out.println();
+        }
+    }
 }
