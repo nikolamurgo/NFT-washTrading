@@ -1,24 +1,27 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
+
 
 public class ETNgraph {
 
+
+    // TODO:  implement adjacencyList with Hashing
+    //  instead of ArrayList to achieve average time complexity of O(1)
+
     // adjacency list
-    private ArrayList<Node> graph;
+    private HashMap<String,Node> graph;
 
     public ETNgraph(){
-        this.graph = new ArrayList<>();
+        this.graph = new HashMap<>();
     }
 
     public void addNode(Node node){
-        for(int i = 0; i< graph.size(); i++){
-            if(graph.get(i).getAddress().equals(node.address)){
-                return;
-            }
+        if(graph.containsKey(node.getAddress())){
+            return;
         }
-        graph.add(node);
+        graph.put(node.getAddress(),node);
     }
 
     public void addEdge(Node node1, Node node2){
@@ -26,15 +29,16 @@ public class ETNgraph {
         node1.edges.add(edge);
     }
 
-    //implement a BuildGraph method here later:
     public void buildGraph() throws IOException {
 
+        String filename = "src/linkabilityNetworksData/prog3ETNsample.csv";
+        BufferedReader br = new BufferedReader(new FileReader(filename));
         String line = "";
-        BufferedReader br = new BufferedReader(new FileReader("src/linkabilityNetworksData/prog3ETNsample.csv"));
 
         long start = System.currentTimeMillis();
-
+        int counter=0;
         while (br.readLine() != null) {
+            counter++;
             line = br.readLine();
             String[] dataOnLine = line.split(",");
             Node sender = new Node(dataOnLine[5]);
@@ -44,8 +48,9 @@ public class ETNgraph {
         }
 
         long end = System.currentTimeMillis();
-        System.out.println(end - start);
-
+        System.out.println("Total number of transactions in ETN: " + counter);
+        System.out.println("Number of unique senders: " + graph.size());
+        System.out.println("Time: "+(end - start)+"ms");
 
         br.close();
     }
