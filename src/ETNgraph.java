@@ -6,10 +6,6 @@ import java.util.HashMap;
 
 public class ETNgraph {
 
-
-    // TODO:  implement adjacencyList with Hashing
-    //  instead of ArrayList to achieve average time complexity of O(1)
-
     // adjacency list
     private HashMap<String,Node> graph;
 
@@ -18,6 +14,9 @@ public class ETNgraph {
     }
 
     public void addNode(Node node){
+        if (node == null){
+            return; // since we dont know the sender of the transaction dont add it. Probably this cant happen...
+        }
         if(graph.containsKey(node.getAddress())){
             return;
         }
@@ -25,8 +24,13 @@ public class ETNgraph {
     }
 
     public void addEdge(Node node1, Node node2){
+        // TODO: do we need to check if both nodes are already in the hashtable?
+        // i think not ?? since addNode(sender) in buildGraph already ensures that node1 is added in graph and
+        // we dont need the receiver to be added to the graph since there are just senders.
+
         Edge edge = new Edge(node1, node2);
         node1.edges.add(edge);
+
     }
 
     public void buildGraph() throws IOException {
@@ -36,9 +40,7 @@ public class ETNgraph {
         String line = "";
 
         long start = System.currentTimeMillis();
-        int counter=0;
         while (br.readLine() != null) {
-            counter++;
             line = br.readLine();
             String[] dataOnLine = line.split(",");
             Node sender = new Node(dataOnLine[5]);
@@ -48,9 +50,6 @@ public class ETNgraph {
         }
 
         long end = System.currentTimeMillis();
-        System.out.println("Total number of transactions in ETN: " + counter);
-        System.out.println("Number of unique senders: " + graph.size());
-        System.out.println("Time: "+(end - start)+"ms");
 
         br.close();
     }
