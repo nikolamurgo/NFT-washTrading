@@ -23,13 +23,19 @@ public class ETNgraph {
         graph.put(node.getAddress(),node);
     }
 
-    public void addEdge(Node node1, Node node2){
+    public void addEdge(Node sender, Node receiver){
         // TODO: do we need to check if both nodes are already in the hashtable?
         // i think not ?? since addNode(sender) in buildGraph already ensures that node1 is added in graph and
         // we dont need the receiver to be added to the graph since there are just senders.
 
-        Edge edge = new Edge(node1, node2);
-        node1.edges.add(edge);
+        Edge edge = new Edge(sender, receiver);
+
+        if(sender.getAddress().equals(receiver.getAddress())){ // prevent self loops
+            return;
+        }
+        if(!sender.edges.contains(edge)){ // prevent multiple edges
+            sender.edges.add(edge);
+        }
 
     }
 
