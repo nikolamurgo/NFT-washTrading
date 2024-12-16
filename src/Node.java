@@ -1,12 +1,12 @@
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Node {
     String address; // hash address of each entity
-    public ArrayList<Edge> edges; // connected nodes
+    public HashMap<String,Edge> edges; // connected nodes
 
     public Node(String address) {
         this.address = address;
-        edges = new ArrayList<>();
+        edges = new HashMap<>(32);
     }
 
     //getter for node hash address

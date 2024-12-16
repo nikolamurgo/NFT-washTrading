@@ -10,31 +10,31 @@ public class ETNgraph {
     private HashMap<String,Node> graph;
 
     public ETNgraph(){
-        this.graph = new HashMap<>();
+        this.graph = new HashMap<>(16 );
     }
 
-    public void addNode(Node node){
-        if (node == null){
-            return; // since we dont know the sender of the transaction dont add it. Probably this cant happen...
+    public boolean addNode(String address){
+
+        if(graph.containsKey(address)){
+            return false;
+        }else {
+            Node node = new Node(address);
+            graph.put(address, node);
+            return true;
         }
-        if(graph.containsKey(node.getAddress())){
-            return;
-        }
-        graph.put(node.getAddress(),node);
     }
 
-    public void addEdge(Node sender, Node receiver){
-        // TODO: do we need to check if both nodes are already in the hashtable?
-        // i think not ?? since addNode(sender) in buildGraph already ensures that node1 is added in graph and
-        // we dont need the receiver to be added to the graph since there are just senders.
+    public void addEdge(String sender, String receiver){
 
-        Edge edge = new Edge(sender, receiver);
-
-        if(sender.getAddress().equals(receiver.getAddress())){ // prevent self loops
+        if(sender.equals(receiver)){ // prevent self loops
             return;
         }
-        if(!sender.edges.contains(edge)){ // prevent multiple edges
-            sender.edges.add(edge);
+        Node receiverNode = new Node(receiver);
+        Node senderNode = new Node(sender);
+        Edge edge = new Edge(senderNode, receiverNode);
+
+        if(!senderNode.edges.containsKey(receiver)){ // prevent multiple edges
+            senderNode.edges.put(receiver, edge);
         }
 
     }
@@ -43,20 +43,23 @@ public class ETNgraph {
 
         String filename = "src/linkabilityNetworksData/prog3ETNsample.csv";
         BufferedReader br = new BufferedReader(new FileReader(filename));
-        String line = "";
+        String line;
 
         long start = System.currentTimeMillis();
-        while (br.readLine() != null) {
-            line = br.readLine();
-            String[] dataOnLine = line.split(",");
-            Node sender = new Node(dataOnLine[5]);
-            Node receiver = new Node(dataOnLine[6]);
-            addNode(sender);
-            addEdge(sender, receiver);
+        String[] dataOnLine;
+
+        while ((line = br.readLine()) != null) {
+            dataOnLine = line.split(",");
+            String sender = dataOnLine[5];
+            String receiver = dataOnLine[6];
+            if(addNode(sender)){
+                addEdge(sender, receiver);
+            }
+
         }
 
         long end = System.currentTimeMillis();
-
+        System.out.println("Time needed: "+(end-start));
         br.close();
     }
 
