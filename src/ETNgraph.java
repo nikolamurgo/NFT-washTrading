@@ -1,3 +1,6 @@
+import util.LogLevel;
+import util.Logger;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -39,6 +42,23 @@ public class ETNgraph {
 
     }
 
+    // TODO: reimplement, maybe works, test, long run time...
+    public boolean removeCEX(String transaction) throws IOException {
+        String filename = "src/linkabilityNetworksData/blacklist/cex.json";
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        String line;
+
+        while((line = br.readLine()) != null){
+            // TODO: remove the address from graph
+            String[] dataOnLine = line.split(",");
+            if(dataOnLine[0].equals(transaction)){
+                return true;
+            }
+        }
+        br.close();
+        return false;
+    }
+
     public void buildGraph() throws IOException {
 
         String filename = "src/linkabilityNetworksData/prog3ETNsample.csv";
@@ -52,14 +72,19 @@ public class ETNgraph {
             dataOnLine = line.split(",");
             String sender = dataOnLine[5];
             String receiver = dataOnLine[6];
-            if(addNode(sender)){
-                addEdge(sender, receiver);
+            String transaction = dataOnLine[0];
+            // TODO: improve... infinity run, why? find other way to remove CEX
+            if(!removeCEX(transaction)){
+                if(addNode(sender)){
+                    addEdge(sender, receiver);
+                }
             }
 
         }
 
         long end = System.currentTimeMillis();
-        System.out.println("Time needed: "+(end-start));
+        Logger.log("Time needed for init graph: "+(end-start), LogLevel.Success);
+        Logger.log("Initial graph size: "+graph.size());
         br.close();
     }
 
