@@ -5,6 +5,7 @@ public class Main {
 
         ETNgraph etngraph = new ETNgraph();
 
+        etngraph.loadBlacklist();
         etngraph.buildGraph();
 
     }

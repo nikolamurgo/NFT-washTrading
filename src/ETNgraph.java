@@ -2,28 +2,29 @@ import util.LogLevel;
 import util.Logger;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 
 
 public class ETNgraph {
 
     // adjacency list
     private HashMap<String,Node> graph;
+    private HashSet<String> blacklistedAddresses;
 
     public ETNgraph(){
-        this.graph = new HashMap<>(16 );
+        this.graph = new HashMap<>(16);
+        this.blacklistedAddresses = new HashSet<>();
     }
 
-    public boolean addNode(String address){
+    public void addNode(String address){
 
-        if(graph.containsKey(address)){
-            return false;
-        }else {
+        if(!graph.containsKey(address)){
             Node node = new Node(address);
             graph.put(address, node);
-            return true;
         }
     }
 
@@ -32,8 +33,8 @@ public class ETNgraph {
         if(sender.equals(receiver)){ // prevent self loops
             return;
         }
-        Node receiverNode = new Node(receiver);
-        Node senderNode = new Node(sender);
+        Node receiverNode = graph.get(receiver);
+        Node senderNode = graph.get(sender);
         Edge edge = new Edge(senderNode, receiverNode);
 
         if(!senderNode.edges.containsKey(receiver)){ // prevent multiple edges
@@ -42,21 +43,34 @@ public class ETNgraph {
 
     }
 
-    // TODO: reimplement, maybe works, test, long run time...
-    public boolean removeCEX(String transaction) throws IOException {
-        String filename = "src/linkabilityNetworksData/blacklist/cex.json";
-        BufferedReader br = new BufferedReader(new FileReader(filename));
-        String line;
+    public void loadBlacklist() throws IOException {
+        File folder = new File("src/linkabilityNetworksData/blacklist");
+        File[] files = folder.listFiles();
 
-        while((line = br.readLine()) != null){
-            // TODO: remove the address from graph
-            String[] dataOnLine = line.split(",");
-            if(dataOnLine[0].equals(transaction)){
-                return true;
+        if (files != null) {
+            for (File file : files) {
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String line;
+
+                while ((line = br.readLine()) != null) {
+                    line = line.trim();
+                    if (line.startsWith("[") || line.startsWith("]")) {
+                        continue;
+                    }
+
+                    line = line.replace("\"", "").replace(",", "").trim();
+                    if (!line.isEmpty()) {
+                        blacklistedAddresses.add(line);
+                    }
+                }
+                br.close();
+
             }
         }
-        br.close();
-        return false;
+    }
+
+    public boolean isBlacklisted(String address) {
+        return blacklistedAddresses.contains(address);
     }
 
     public void buildGraph() throws IOException {
@@ -72,12 +86,11 @@ public class ETNgraph {
             dataOnLine = line.split(",");
             String sender = dataOnLine[5];
             String receiver = dataOnLine[6];
-            String transaction = dataOnLine[0];
-            // TODO: improve... infinity run, why? find other way to remove CEX
-            if(!removeCEX(transaction)){
-                if(addNode(sender)){
-                    addEdge(sender, receiver);
-                }
+
+            if (!isBlacklisted(sender) && !isBlacklisted(receiver)) {
+                addNode(sender);
+                addNode(receiver);
+                addEdge(sender, receiver);
             }
 
         }
