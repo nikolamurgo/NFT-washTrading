@@ -6,12 +6,6 @@ public class Node {
 
     public Node(String address) {
         this.address = address;
-        edges = new HashMap<>(32);
+        this.edges = new HashMap<>();
     }
-
-    //getter for node hash address
-    public String getAddress() {
-        return address;
-    }
-
 }

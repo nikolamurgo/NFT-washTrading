@@ -1,6 +1,3 @@
-import util.LogLevel;
-import util.Logger;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -12,16 +9,17 @@ import java.util.HashSet;
 public class ETNgraph {
 
     // adjacency list
-    private HashMap<String,Node> graph;
+    public HashMap<String,Node> graph;
     private HashSet<String> blacklistedAddresses;
+    private HashSet<String> baycAddresses;
 
     public ETNgraph(){
-        this.graph = new HashMap<>(16);
+        this.graph = new HashMap<>();
         this.blacklistedAddresses = new HashSet<>();
+        this.baycAddresses = new HashSet<>();
     }
 
     public void addNode(String address){
-
         if(!graph.containsKey(address)){
             Node node = new Node(address);
             graph.put(address, node);
@@ -33,11 +31,10 @@ public class ETNgraph {
         if(sender.equals(receiver)){ // prevent self loops
             return;
         }
-        Node receiverNode = graph.get(receiver);
         Node senderNode = graph.get(sender);
-        Edge edge = new Edge(senderNode, receiverNode);
 
         if(!senderNode.edges.containsKey(receiver)){ // prevent multiple edges
+            Edge edge = new Edge(sender, receiver);
             senderNode.edges.put(receiver, edge);
         }
 
@@ -64,7 +61,6 @@ public class ETNgraph {
                     }
                 }
                 br.close();
-
             }
         }
     }
@@ -73,31 +69,45 @@ public class ETNgraph {
         return blacklistedAddresses.contains(address);
     }
 
-    public void buildGraph() throws IOException {
-
-        String filename = "src/linkabilityNetworksData/prog3ETNsample.csv";
-        BufferedReader br = new BufferedReader(new FileReader(filename));
+    public void loadBAYCAddresses() throws IOException {
+        String baycFile = "src/linkabilityNetworksData/boredapeyachtclub.csv";
+        BufferedReader br = new BufferedReader(new FileReader(baycFile));
         String line;
 
-        long start = System.currentTimeMillis();
+        while ((line = br.readLine()) != null) {
+            String[] dataOnLine = line.split(",");
+            String fromAddress = dataOnLine[4];
+            String toAddress = dataOnLine[5];
+
+            // Add both addresses to the BAYC address set
+            baycAddresses.add(fromAddress);
+            baycAddresses.add(toAddress);
+        }
+        br.close();
+    }
+
+    public boolean isBAYCAddress(String address) {
+        return baycAddresses.contains(address);
+    }
+
+    public void buildGraph() throws IOException {
+
+        String fileSample = "src/linkabilityNetworksData/prog3ETNsample.csv";
+        BufferedReader br = new BufferedReader(new FileReader(fileSample));
+        String line;
+
         String[] dataOnLine;
 
         while ((line = br.readLine()) != null) {
             dataOnLine = line.split(",");
             String sender = dataOnLine[5];
             String receiver = dataOnLine[6];
-
-            if (!isBlacklisted(sender) && !isBlacklisted(receiver)) {
+            if ((!isBlacklisted(sender) && !isBlacklisted(receiver)) && (isBAYCAddress(sender) || isBAYCAddress(receiver) )) {
                 addNode(sender);
                 addNode(receiver);
                 addEdge(sender, receiver);
             }
-
         }
-
-        long end = System.currentTimeMillis();
-        Logger.log("Time needed for init graph: "+(end-start), LogLevel.Success);
-        Logger.log("Initial graph size: "+graph.size());
         br.close();
     }
 

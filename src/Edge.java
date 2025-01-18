@@ -1,20 +1,9 @@
 public class Edge {
+    String sender;
+    String receiver;
 
-    Node sender;
-    Node receiver;
-
-    public Edge(Node sender, Node receiver) {
+    public Edge(String sender, String receiver) {
         this.sender = sender;
         this.receiver = receiver;
     }
-
-    // getters
-    public Node getSender() {
-        return sender;
-    }
-    public Node getReceiver() {
-        return receiver;
-    }
-
-
 }
